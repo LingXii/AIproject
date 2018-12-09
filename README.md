@@ -1,6 +1,3 @@
-# AIproject
-Have fun with turtlebot2.
-  
 # How to run and control the turtlebot2?
 Step1: input 'roscore' in a terminal.  
 Step2: open a new terminal and input 'roslaunch turtlebot_gazebo turtlebot_world.launch'.  
