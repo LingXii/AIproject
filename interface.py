@@ -12,7 +12,7 @@ class Interface:
 		rospy.on_shutdown(self.shutdown)
 		self.cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=10)
 		r = rospy.Rate(10);
-		
+
 		# Initialize tf listener, and give some time to fill its buffer
 		self.tf_listener = tf.TransformListener()
 		rospy.sleep(2)
@@ -22,8 +22,8 @@ class Interface:
 		self.tf_listener.waitForTransform(self.odom_frame, self.base_frame, rospy.Time(), rospy.Duration(60.0))
 		self.scan_data = LaserScan()
 		self.imu_data = Imu()
-		rospy.Subscriber('scan',LaserScan,self.scan_callback)
-		rospy.Subscriber('mobile_base/sensors/imu_data',Imu,self.imu_callback);
+		scan_sub = rospy.Subscriber('scan',LaserScan,self.scan_callback)
+		imu_sub = rospy.Subscriber('mobile_base/sensors/imu_data',Imu,self.imu_callback)
 
 		while not rospy.is_shutdown():		
 			try:
@@ -46,8 +46,33 @@ class Interface:
 				# Quaternion orientation
 				# Vector3 angular_velocity
 				# Vector3 linear_acceleration
+			'''all imu:
+				header:
+				seq: 9160
+				stamp:
+				secs: 91
+				nsecs: 670000000
+			frame_id: "base_link"
+				orientation:
+				x: 0.00391107670508
+				y: -0.000831327626106
+				z: 0.97597599875
+				w: 0.217841369433
 
-			#____________________________input_________________________________
+				orientation_covariance: [1000000.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.05]
+				angular_velocity:
+				x: 0.0109897331709
+				y: -2.64649450873e-05
+				z: 0.991600376682
+				
+				angular_velocity_covariance: [1000000.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.05]
+				linear_acceleration:
+				x: 0.207841310035
+				y: 0.149277709396
+				z: 9.90528330169
+				linear_acceleration_covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]'''
+
+#____________________________input_________________________________
 			speed = 0 
 			steer = 0 
 			# speed and steer is the variable to output
