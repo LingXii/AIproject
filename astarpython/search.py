@@ -13,25 +13,30 @@ class search(object):
     f_score = {} # estimated path cost from [node] to the goal node
     theboard = ""
 
-    def __init__(self,img,length,height):
+    def __init__(self,img,length,height,startx,starty,goalx,goaly):
 
         i = 0
+        kernel = np.ones((10,10), np.uint8)
+        img = cv2.dilate(img, kernel, iterations=1)
         #img2 = np.zeros((img.shape))
-        for sq in self.run(img,length,height):
+        return_path = self.run(img, length, height,startx,starty,goalx,goaly)
+        for sq in return_path:
             self.theboard.squares[sq.x][sq.y].state = '*'
             img[sq.y][sq.x] = 255
             i = i + 1
         #print self.theboard
         cv2.imwrite("./output.png",img)
 
-    def run(self,img,length,height):
+    def run(self,img,length,height,startx,starty,goalx,goaly):
         """ Run the search """
 
         # setup board
-        self.theboard = board(img,length,height)
+        self.theboard = board(img,length,height,startx,starty,goalx,goaly)
         #print self.theboard
         start = self.theboard.start
+        print("start:",start)
         goal = self.theboard.goal
+        print("goal:", goal)
         # initialise start node
         self.g_score[start] = 0
         self.f_score[start] = self.g_score[start] + self.heuristic_cost_estimate(start,goal)
@@ -92,21 +97,21 @@ class search(object):
         if node.south != 0:
             neighbours.add(node.south)
 
-        if node.northwest != 0:
+        '''if node.northwest != 0:
             neighbours.add(node.northwest)
         if node.northeast != 0:
             neighbours.add(node.northeast)
         if node.southwest != 0:
             neighbours.add(node.southwest)
         if node.southeast != 0:
-            neighbours.add(node.southeast)
+            neighbours.add(node.southeast)'''
         
         return neighbours
 
 
     def distance_to(self,start_node,end_node):
         """ The distance in a straight line between two points on the board """
-        x = start_node.x - end_node.x
+        x = 3*(start_node.x - end_node.x)
         y = start_node.y - end_node.y
 
         return abs(x) + abs(y)
@@ -138,7 +143,11 @@ class search(object):
         for i in set_to_count:
             total_count = total_count + 1
         return total_count
-img = cv2.imread("./map.png",0)
+'''img = cv2.imread("./map.png",0)
 length = img.shape[1]
 height = img.shape[0]
-search(img,length,height)
+startx = 170
+starty = 320
+goalx =  250
+goaly = 285
+search(img,length,height,startx,starty,goalx,goaly)'''
