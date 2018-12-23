@@ -8,7 +8,7 @@ class board(object):
     height = 20
     squares = []
 
-    def __init__(self,img,length,height):
+    def __init__(self,img,length,height,startx,starty,goalx,goaly):
         """ Loads the board, creates a square for each point on the board, and links those points together"""
         self.length = int(length)
         self.height = int(height)
@@ -21,8 +21,8 @@ class board(object):
             for x in range(self.length):
                 self.squares[x][y].state = str(img[y][x])
                 self.link(self.squares[x][y])
-        self.start = self.squares[0][0]
-        self.goal = self.squares[self.length - 1][self.height - 1]
+        self.start = self.squares[startx][starty]
+        self.goal = self.squares[goalx][goaly]
     '''
             with open(path) as input_data:
                 x = 0
