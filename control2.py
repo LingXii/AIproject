@@ -14,7 +14,7 @@ class Interface:
 		rospy.loginfo("To stop TurtleBot CTRL + C")
 		rospy.on_shutdown(self.shutdown)
 		self.cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=10)
-		rate = rospy.Rate(20);
+		rate = rospy.Rate(10);
 		
 		# Initialize tf listener, and give some time to fill its buffer
 		self.tf_listener = tf.TransformListener()
@@ -131,7 +131,7 @@ class Interface:
 							tx = int(mx + k*(y-my))
 							self.gmap[y,tx] = max(self.gmap[y,tx] - MAP_INFO,0)
 				
-				self.gmap[my,mx] = min(self.gmap[my,mx] + MAP_INFO,255)		
+				self.gmap[my,mx] = min(self.gmap[my,mx] + MAP_INFO*10,255)		
 				scan_angle += self.scan_data.angle_increment
 			self.vmap[:,:,2] = self.gmap[:,:]
 			cv2.imwrite("map.png",cv2.flip(self.vmap,0))			
@@ -142,19 +142,26 @@ class Interface:
 			# speed and steer is the variable to output
 	
 			MAX_D = self.gmap.shape[0] + self.gmap.shape[1] 
-			obs = argwhere(self.gmap>200) # where are obstacles
+			#obs = argwhere(self.gmap>200) # where are obstacles
 			min_d = MAX_D # find which obstacle point is the nearest
 			mx = int(px/PLENGTH + MAPW/2)
-			my = int(py/PLENGTH + MAPH/2)
+			my = int(py/PLENGTH + MAPH/2)			
+			x0 = max(mx - 25,0)
+			xn = min(mx + 25,MAPW)
+			y0 = max(my - 25,0)
+			yn = min(my + 25,MAPH)
+			obs = argwhere(self.gmap[y0:yn,x0:xn]>200) + [y0,x0]						
 			for p in obs:
-				if((p[1]-mx)*cos(yaw)+(p[0]-my)*sin(yaw)<0): continue # the inner product of (p[1]-mx,p[0]-my) and yaw should be positve
+				# the inner product of (p[1]-mx,p[0]-my) and yaw should be positve
 				dis = sqrt((my-p[0])**2 + (mx-p[1])**2)
+				if(((p[1]-mx)*cos(yaw)+(p[0]-my)*sin(yaw))<0.5): continue 				
 				if(min_d > dis):
 					min_d = dis
 			min_d = min_d*PLENGTH
 			
 			if(len(obs)): speed = (min_d-SECURE_DIS)*1 # speed will slow down when robot near obstacles
 			else: speed = 0	# speed will be zero when we haven't got the laser data
+			
 			#print('min_d = {}, speed = {}'.format(min_d,speed))
 			if(speed>0.4): speed = 0.4
 			if(speed<0.01): speed = 0	
@@ -184,9 +191,7 @@ class Interface:
 			#steer = 0
 			
 			#____________________________output begin_________________________________
-			move_cmd = Twist()
-			
-			
+			move_cmd = Twist()			
 			move_cmd.linear.x = speed
 			move_cmd.angular.z = steer
 			self.cmd_vel.publish(move_cmd)
@@ -216,11 +221,17 @@ class Interface:
 		W_POSITION = 4 # weight of position
 		W_DIRECTION = 1 # weight of direction
 		MAX_D = self.gmap.shape[0] + self.gmap.shape[1]
-		obs = argwhere(self.gmap>128) # where are obstacles
+		#obs = argwhere(self.gmap>128) # where are obstacles	
+		x0 = max(x - 25,0)
+		xn = min(x + 25,self.gmap.shape[1])
+		y0 = max(y - 25,0)
+		yn = min(y + 25,self.gmap.shape[0])
+		obs = argwhere(self.gmap[y0:yn,x0:xn]>128) + [y0,x0]		
 		min_d = MAX_D # find which obstacle point is the nearest
 		for p in obs:
-			if((p[1]-x)*cos(v)+(p[0]-y)*sin(v)<0): continue # the inner product of (p[1]-x,p[0]-y) and v should be positve
+			# the inner product of (p[1]-x,p[0]-y) and v should be positve
 			dis = sqrt((y-p[0])**2 + (x-p[1])**2)
+			if(((p[1]-x)*cos(v)+(p[0]-y)*sin(v))/dis<0.5): continue			
 			if(min_d > dis):
 				min_d = dis
 		line_d = 0 # how far is the nearest obstacle if go straight
