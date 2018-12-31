@@ -5,3 +5,6 @@ Step3: enter the directory where the file 'interface.py' is, and run it. (You ca
   
 # What we need to do?
 Write some codes between 'input' and 'output', to realize some function.
+
+# Notice
+overwrite the file 'openni.launch' in '/opt/ros/kinetic/share/openni/launch/openni.launch'.
